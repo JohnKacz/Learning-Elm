@@ -1,6 +1,7 @@
 module TurnTracker exposing (..)
 
-import Html exposing (Html, beginnerProgram, div, text, button)
+import Html exposing (..)
+import Html.Attributes exposing (disabled)
 import Html.Events exposing (onClick)
 
 
@@ -8,18 +9,19 @@ main =
     beginnerProgram { model = model, view = view, update = update }
 
 
-colors =
-    [ "#F70044"
-    , "#A52A2A"
-    , "#F6D600"
-    , "#167FC5"
-    , "#11ED76"
-    , "#8A2BE2"
-    , "#F76F22"
-    , "#BB11AA"
-    , "#33EEEE"
-    , "#333333"
-    ]
+
+--colors =
+--    [ "#F70044"
+--    , "#A52A2A"
+--    , "#F6D600"
+--    , "#167FC5"
+--    , "#11ED76"
+--    , "#8A2BE2"
+--    , "#F76F22"
+--    , "#BB11AA"
+--    , "#33EEEE"
+--    , "#333333"
+--    ]
 
 
 type alias Model =
@@ -27,6 +29,7 @@ type alias Model =
     , nextPlayer : Player
     , otherPlayers : List Player
     , playerCount : Int
+    , page : Page
     }
 
 
@@ -36,12 +39,18 @@ type alias Player =
     }
 
 
+type Page
+    = SetupPage
+    | TrackerPage
+
+
 model : Model
 model =
     { currentPlayer = { id = 1, name = "Player 1" }
     , nextPlayer = { id = 2, name = "Player 2" }
     , otherPlayers = []
     , playerCount = 2
+    , page = SetupPage
     }
 
 
@@ -67,6 +76,7 @@ update msg model =
         Start ->
             { model
                 | otherPlayers = List.reverse model.otherPlayers
+                , page = TrackerPage
             }
 
         -- TODO - Handle NextTurn before game has been started
@@ -90,7 +100,7 @@ nextTurn model =
             { model
                 | currentPlayer = model.nextPlayer
                 , nextPlayer = player
-                , otherPlayers = (Maybe.withDefault [] (List.tail model.otherPlayers)) ++ [ model.currentPlayer ]
+                , otherPlayers = (Maybe.withDefault [] <| List.tail model.otherPlayers) ++ [ model.currentPlayer ]
             }
 
         Nothing ->
@@ -130,6 +140,21 @@ removePlayer model =
 view : Model -> Html Msg
 view model =
     div []
+        [ h2 [] [ text "Turn Tracker" ]
+        , hr [] []
+        , case model.page of
+            SetupPage ->
+                setupPage model
+
+            TrackerPage ->
+                trackerPage model
+        , div [] [ text (toString model) ]
+        ]
+
+
+setupPage : Model -> Html Msg
+setupPage model =
+    div []
         [ div []
             [ text "Number of Players"
             , button [ onClick Increment ] [ text "+" ]
@@ -137,6 +162,12 @@ view model =
             , button [ onClick Decrement ] [ text "-" ]
             ]
         , button [ onClick Start ] [ text "Start" ]
+        ]
+
+
+trackerPage : Model -> Html Msg
+trackerPage model =
+    div []
+        [ h4 [] [ text ("It is " ++ model.currentPlayer.name ++ "'s turn") ]
         , button [ onClick NextTurn ] [ text "Next" ]
-        , div [] [ text (toString model) ]
         ]
