@@ -8,12 +8,25 @@ main =
     beginnerProgram { model = model, view = view, update = update }
 
 
+colors =
+    [ "#F70044"
+    , "#A52A2A"
+    , "#F6D600"
+    , "#167FC5"
+    , "#11ED76"
+    , "#8A2BE2"
+    , "#F76F22"
+    , "#BB11AA"
+    , "#33EEEE"
+    , "#333333"
+    ]
+
+
 type alias Model =
     { currentPlayer : Player
     , nextPlayer : Player
     , otherPlayers : List Player
     , playerCount : Int
-    , status : String
     }
 
 
@@ -56,6 +69,10 @@ update msg model =
                 | otherPlayers = List.reverse model.otherPlayers
             }
 
+        -- TODO - Handle NextTurn before game has been started
+        NextTurn ->
+            nextTurn model
+
         Finish ->
             model
 
@@ -64,6 +81,20 @@ update msg model =
 
         Decrement ->
             removePlayer model
+
+
+nextTurn : Model -> Model
+nextTurn model =
+    case List.head model.otherPlayers of
+        Just player ->
+            { model
+                | currentPlayer = model.nextPlayer
+                , nextPlayer = player
+                , otherPlayers = (Maybe.withDefault [] (List.tail model.otherPlayers)) ++ [ model.currentPlayer ]
+            }
+
+        Nothing ->
+            { model | currentPlayer = model.nextPlayer, nextPlayer = model.currentPlayer }
 
 
 addPlayer : Model -> Model
@@ -106,5 +137,6 @@ view model =
             , button [ onClick Decrement ] [ text "-" ]
             ]
         , button [ onClick Start ] [ text "Start" ]
+        , button [ onClick NextTurn ] [ text "Next" ]
         , div [] [ text (toString model) ]
         ]
