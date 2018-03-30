@@ -1,7 +1,7 @@
 module TurnTracker exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (disabled, style)
+import Html.Attributes exposing (class, disabled, style)
 import Html.Events exposing (onClick)
 
 
@@ -216,7 +216,7 @@ reversePlayers model =
 
 view : Model -> Html Msg
 view model =
-    div [ style [ ( "text-align", "center" ) ] ]
+    div [ class "container", style [ ( "text-align", "center" ) ] ]
         [ body model
 
         --, div [] [ text (toString model) ]
@@ -250,7 +250,14 @@ setupPage model =
 trackerPage : Model -> Html Msg
 trackerPage model =
     div [ trackerStyle model.currentPlayer.color ]
-        [ h1 [] [ text ("It is " ++ model.currentPlayer.name ++ "'s turn") ]
+        [ div
+            [ style
+                [ ( "color", "#FFFFFF" )
+                , ( "text-shadow", "1px 1px 2px #333333" )
+                , ( "font-size", "80px" )
+                ]
+            ]
+            [ text model.currentPlayer.name ]
         , button [ onClick NextTurn ] [ text "Next" ]
         , button [ onClick SkipTurn ] [ text "Skip" ]
         , button [ onClick ReverseTurns ] [ text "Reverse" ]
@@ -261,6 +268,8 @@ trackerStyle : String -> Attribute Msg
 trackerStyle c =
     style
         [ ( "background-color", c )
-        , ( "height", "100vh" )
-        , ( "padding-top", "30vh" )
+        , ( "height", "250px" )
+        , ( "width", "40%" )
+        , ( "min-width", "400px" )
+        , ( "margin", "50px auto" )
         ]
