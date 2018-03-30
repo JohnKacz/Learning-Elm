@@ -58,7 +58,7 @@ type Msg
     = Start
     | NextTurn
     | SkipTurn
-      --| ReverseTurns
+    | ReverseTurns
     | Finish
     | Increment
     | Decrement
@@ -98,6 +98,9 @@ update msg model =
 
                 SkipTurn ->
                     skipTurn model
+
+                ReverseTurns ->
+                    reverseTurns model
 
                 _ ->
                     model
@@ -152,6 +155,29 @@ skipTurn model =
     model |> nextTurn |> nextTurn
 
 
+reverseTurns : Model -> Model
+reverseTurns model =
+    model |> reversedPlayers |> nextTurn
+
+
+reversedPlayers : Model -> Model
+reversedPlayers model =
+    let
+        reversedPlyayers =
+            List.reverse (model.nextPlayer :: model.otherPlayers)
+
+        newNext =
+            Maybe.withDefault model.nextPlayer <| List.head reversedPlyayers
+
+        newOthers =
+            Maybe.withDefault [] <| List.tail reversedPlyayers
+    in
+        { model
+            | nextPlayer = newNext
+            , otherPlayers = newOthers
+        }
+
+
 view : Model -> Html Msg
 view model =
     div []
@@ -186,4 +212,5 @@ trackerPage model =
         [ h4 [] [ text ("It is " ++ model.currentPlayer.name ++ "'s turn") ]
         , button [ onClick NextTurn ] [ text "Next" ]
         , button [ onClick SkipTurn ] [ text "Skip" ]
+        , button [ onClick ReverseTurns ] [ text "Reverse" ]
         ]
