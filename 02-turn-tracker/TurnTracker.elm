@@ -57,6 +57,8 @@ model =
 type Msg
     = Start
     | NextTurn
+    | SkipTurn
+      --| ReverseTurns
     | Finish
     | Increment
     | Decrement
@@ -94,22 +96,11 @@ update msg model =
                 NextTurn ->
                     nextTurn model
 
+                SkipTurn ->
+                    skipTurn model
+
                 _ ->
                     model
-
-
-nextTurn : Model -> Model
-nextTurn model =
-    case List.head model.otherPlayers of
-        Just player ->
-            { model
-                | currentPlayer = model.nextPlayer
-                , nextPlayer = player
-                , otherPlayers = (Maybe.withDefault [] <| List.tail model.otherPlayers) ++ [ model.currentPlayer ]
-            }
-
-        Nothing ->
-            { model | currentPlayer = model.nextPlayer, nextPlayer = model.currentPlayer }
 
 
 addPlayer : Model -> Model
@@ -140,6 +131,25 @@ removePlayer model =
             }
     else
         model
+
+
+nextTurn : Model -> Model
+nextTurn model =
+    case List.head model.otherPlayers of
+        Just player ->
+            { model
+                | currentPlayer = model.nextPlayer
+                , nextPlayer = player
+                , otherPlayers = (Maybe.withDefault [] <| List.tail model.otherPlayers) ++ [ model.currentPlayer ]
+            }
+
+        Nothing ->
+            { model | currentPlayer = model.nextPlayer, nextPlayer = model.currentPlayer }
+
+
+skipTurn : Model -> Model
+skipTurn model =
+    model |> nextTurn |> nextTurn
 
 
 view : Model -> Html Msg
@@ -175,4 +185,5 @@ trackerPage model =
     div []
         [ h4 [] [ text ("It is " ++ model.currentPlayer.name ++ "'s turn") ]
         , button [ onClick NextTurn ] [ text "Next" ]
+        , button [ onClick SkipTurn ] [ text "Skip" ]
         ]
