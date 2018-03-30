@@ -22,6 +22,11 @@ main =
 --    , "#33EEEE"
 --    , "#333333"
 --    ]
+{--
+
+---------- MODEL ----------
+
+--}
 
 
 type alias Model =
@@ -52,6 +57,14 @@ model =
     , playerCount = 2
     , page = SetupPage
     }
+
+
+
+{--
+
+---------- UPDATE ----------
+
+--}
 
 
 type Msg
@@ -138,6 +151,21 @@ removePlayer model =
 
 nextTurn : Model -> Model
 nextTurn model =
+    model |> getNextPlayer
+
+
+skipTurn : Model -> Model
+skipTurn model =
+    model |> getNextPlayer |> getNextPlayer
+
+
+reverseTurns : Model -> Model
+reverseTurns model =
+    model |> reversePlayers |> getNextPlayer
+
+
+getNextPlayer : Model -> Model
+getNextPlayer model =
     case List.head model.otherPlayers of
         Just player ->
             { model
@@ -150,18 +178,8 @@ nextTurn model =
             { model | currentPlayer = model.nextPlayer, nextPlayer = model.currentPlayer }
 
 
-skipTurn : Model -> Model
-skipTurn model =
-    model |> nextTurn |> nextTurn
-
-
-reverseTurns : Model -> Model
-reverseTurns model =
-    model |> reversedPlayers |> nextTurn
-
-
-reversedPlayers : Model -> Model
-reversedPlayers model =
+reversePlayers : Model -> Model
+reversePlayers model =
     let
         reversedPlyayers =
             List.reverse (model.nextPlayer :: model.otherPlayers)
@@ -176,6 +194,14 @@ reversedPlayers model =
             | nextPlayer = newNext
             , otherPlayers = newOthers
         }
+
+
+
+{--
+
+---------- VIEW ----------
+
+--}
 
 
 view : Model -> Html Msg
