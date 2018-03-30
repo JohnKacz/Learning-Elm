@@ -71,26 +71,31 @@ type Msg
 
 update : Msg -> Model -> Model
 update msg model =
-    case msg of
-        -- TODO - Handle Start after game has already been started
-        Start ->
-            { model
-                | otherPlayers = List.reverse model.otherPlayers
-                , page = TrackerPage
-            }
+    case model.page of
+        SetupPage ->
+            case msg of
+                Start ->
+                    { model
+                        | otherPlayers = List.reverse model.otherPlayers
+                        , page = TrackerPage
+                    }
 
-        -- TODO - Handle NextTurn before game has been started
-        NextTurn ->
-            nextTurn model
+                Increment ->
+                    addPlayer model
 
-        Finish ->
-            model
+                Decrement ->
+                    removePlayer model
 
-        Increment ->
-            addPlayer model
+                _ ->
+                    model
 
-        Decrement ->
-            removePlayer model
+        TrackerPage ->
+            case msg of
+                NextTurn ->
+                    nextTurn model
+
+                _ ->
+                    model
 
 
 nextTurn : Model -> Model
