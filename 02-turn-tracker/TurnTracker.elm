@@ -1,7 +1,7 @@
 module TurnTracker exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (disabled)
+import Html.Attributes exposing (disabled, style)
 import Html.Events exposing (onClick)
 
 
@@ -10,18 +10,6 @@ main =
 
 
 
---colors =
---    [ "#F70044"
---    , "#A52A2A"
---    , "#F6D600"
---    , "#167FC5"
---    , "#11ED76"
---    , "#8A2BE2"
---    , "#F76F22"
---    , "#BB11AA"
---    , "#33EEEE"
---    , "#333333"
---    ]
 {--
 
 ---------- MODEL ----------
@@ -41,6 +29,7 @@ type alias Model =
 type alias Player =
     { id : Int
     , name : String
+    , color : String
     }
 
 
@@ -49,14 +38,35 @@ type Page
     | TrackerPage
 
 
+colors =
+    [ "#EF1010"
+    , "#008FFF"
+    , "#FAFF00"
+    , "#AA00FF"
+    , "#00FF00"
+    , "#FF00FF"
+    , "#FF8B00"
+    , "#3E00FF"
+    , "#00FF75"
+    , "#FF008C"
+    , "#00FFFF"
+    , "#335533"
+    ]
+
+
 model : Model
 model =
-    { currentPlayer = { id = 1, name = "Player 1" }
-    , nextPlayer = { id = 2, name = "Player 2" }
+    { currentPlayer = { id = 1, name = "Player 1", color = color 1 }
+    , nextPlayer = { id = 2, name = "Player 2", color = color 2 }
     , otherPlayers = []
     , playerCount = 2
     , page = SetupPage
     }
+
+
+color : Int -> String
+color n =
+    Maybe.withDefault "#FFFFFF" <| List.head <| List.drop (n - 1) colors
 
 
 
@@ -127,7 +137,7 @@ addPlayer model =
                 model.playerCount + 1
 
             newPlayer =
-                Player newPlayerCount ("Player " ++ (toString newPlayerCount))
+                Player newPlayerCount ("Player " ++ (toString newPlayerCount)) (color newPlayerCount)
         in
             { model | otherPlayers = (newPlayer :: model.otherPlayers), playerCount = newPlayerCount }
     else
@@ -206,27 +216,32 @@ reversePlayers model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h2 [] [ text "Turn Tracker" ]
-        , hr [] []
-        , case model.page of
-            SetupPage ->
-                setupPage model
+    div [ style [ ( "text-align", "center" ) ] ]
+        [ body model
 
-            TrackerPage ->
-                trackerPage model
-        , div [] [ text (toString model) ]
+        --, div [] [ text (toString model) ]
         ]
+
+
+body : Model -> Html Msg
+body model =
+    case model.page of
+        SetupPage ->
+            setupPage model
+
+        TrackerPage ->
+            trackerPage model
 
 
 setupPage : Model -> Html Msg
 setupPage model =
     div []
-        [ div []
-            [ text "Number of Players"
-            , button [ onClick Increment ] [ text "+" ]
+        [ h2 [] [ text "Turn Tracker" ]
+        , h4 [] [ text "Number of Players" ]
+        , div [ style [ ( "font-size", "3em" ) ] ]
+            [ button [ onClick Increment, style [ ( "margin", "1em" ), ( "font-size", "20px" ) ] ] [ text "+" ]
             , text (toString model.playerCount)
-            , button [ onClick Decrement ] [ text "-" ]
+            , button [ onClick Decrement, style [ ( "margin", "1em" ), ( "font-size", "20px" ) ] ] [ text "-" ]
             ]
         , button [ onClick Start ] [ text "Start" ]
         ]
@@ -234,9 +249,18 @@ setupPage model =
 
 trackerPage : Model -> Html Msg
 trackerPage model =
-    div []
-        [ h4 [] [ text ("It is " ++ model.currentPlayer.name ++ "'s turn") ]
+    div [ trackerStyle model.currentPlayer.color ]
+        [ h1 [] [ text ("It is " ++ model.currentPlayer.name ++ "'s turn") ]
         , button [ onClick NextTurn ] [ text "Next" ]
         , button [ onClick SkipTurn ] [ text "Skip" ]
         , button [ onClick ReverseTurns ] [ text "Reverse" ]
+        ]
+
+
+trackerStyle : String -> Attribute Msg
+trackerStyle c =
+    style
+        [ ( "background-color", c )
+        , ( "height", "100vh" )
+        , ( "padding-top", "30vh" )
         ]
